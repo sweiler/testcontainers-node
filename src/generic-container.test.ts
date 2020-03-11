@@ -160,6 +160,32 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set additional host config", async () => {
+    const containerName = "special-test-container";
+    const expectedContainerName = "/special-test-container";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withName(containerName)
+      .withAdditionalHostConfig({
+        LogConfig: {
+          Type: "json-file",
+          Config: {}
+        }
+      })
+      .start();
+
+    const dockerodeClient = new Dockerode();
+
+    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.LogConfig).toEqual({
+      Type: "json-file",
+      Config: {}
+    });
+
+    await container.stop();
+  });
+
   it("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)

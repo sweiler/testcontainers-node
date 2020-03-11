@@ -1,4 +1,4 @@
-import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { HostConfig, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
@@ -63,6 +63,7 @@ type CreateOptions = {
   name?: ContainerName;
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
+  additionalHostConfig?: Partial<HostConfig>;
 };
 
 export interface DockerClient {
@@ -99,7 +100,8 @@ export class DockerodeClient implements DockerClient {
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
-        Tmpfs: options.tmpFs
+        Tmpfs: options.tmpFs,
+        ...options.additionalHostConfig
       }
     });
 
